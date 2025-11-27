@@ -4,10 +4,12 @@ This document provides a detailed mathematical exposition of the multi-armed ban
 
 ## 1. Problem Setup and Notation
 
-We consider a stochastic multi-armed bandit problem with $K$ arms (actions), indexed by $i \in \{0, \dots, K-1\}$.
+We consider a stochastic multi-armed bandit problem with $K$ arms (actions), indexed by $i
+ \{0, \dots, K-1\}$.
 
 *   **Time**: The process proceeds in discrete time steps $t = 1, 2, \dots, T$.
-*   **Rewards**: At each step $t$, the agent selects an arm $A_t \in \{0, \dots, K-1\}$ and observes a reward $r_t$.
+*   **Rewards**: At each step $t$, the agent selects an arm $A_t
+ \{0, \dots, K-1\}$ and observes a reward $r_t$.
 *   **Distribution**: For each arm $i$, rewards are drawn i.i.d. from an unknown probability distribution $\nu_i$ with mean $\mu_i = \mathbb{E}[r \mid A_t=i]$.
 *   **Optimal Arm**: Let $\mu^* = \max_{i} \mu_i$ be the maximal mean reward, and $i^* = \text{argmax}_{i} \mu_i$ be the optimal arm.
 *   **Gap**: The sub-optimality gap for arm $i$ is $\Delta_i = \mu^* - \mu_i$.
@@ -20,7 +22,7 @@ We consider a stochastic multi-armed bandit problem with $K$ arms (actions), ind
 
 2.  **Best-Arm Identification (BAI)**: Identify the optimal arm $i^*$ with high probability using the fewest number of samples, or maximize the probability of identifying $i^*$ given a fixed budget.
 
-3.  **Variance Minimization**: Allocate samples {N_i}_{i=1}^K$ to minimize the variance of an estimator (e.g., Average Treatment Effect), often subject to constraints.
+3.  **Variance Minimization**: Allocate samples {$N_i$}$_{i=1}^K$ to minimize the variance of an estimator (e.g., Average Treatment Effect), often subject to constraints.
 
 ---
 
@@ -31,7 +33,7 @@ We consider a stochastic multi-armed bandit problem with $K$ arms (actions), ind
 
 A baseline policy that selects an arm uniformly at random at each step.
 
-$$ P(A_t = i) = \frac{1}{K} \quad \forall i 
+$$ P(A_t = i) = \frac{1}{K} \quad \forall i
  \{0, \dots, K-1\} $$
 
 *   **Regret**: Linear, $O(T)$.
@@ -57,7 +59,7 @@ Balances exploration and exploitation by selecting a random arm with probability
 $$ \\
 P(A_t = i) = \\
     \begin{cases}
-        1 - \epsilon + \frac{\epsilon}{K} & 
+        1 - \epsilon + \frac{\epsilon}{K} &
         \text{if } i = \text{argmax}_j \hat{\mu}_{j, t-1} \\
         \frac{\epsilon}{K} & \text{otherwise}
     \end{cases}
@@ -164,6 +166,33 @@ Adapts Thompson Sampling for budget-constrained settings where arms have differe
 
 *   **Properties**: Achieves logarithmic regret $O(\ln B)$ where $B$ is the budget. Outperforms standard TS in budgeted settings.
 *   **Reference**: Lal, A. (2022). *Multi-armed Bandits for Budget-Constrained Data Collection*. (Also: Xia et al., 2015).
+
+### 4.3 Representation Bandit
+**Class**: `RepresentationBandit`
+
+Extends Budgeted Thompson Sampling to target specific representation shares for different demographic groups of arms, while still maximizing rewards (survey responses).
+
+**Mechanism**:
+Arms are grouped into strata (e.g., demographic groups) $g \in \{0, \dots, G-1\}$. Each group has a target share $\pi^*_g$.
+The policy dynamically adjusts the cost of arms based on their group's current representation in the sample.
+
+**Cost Adjustment**:
+The effective cost $c_{at}^g$ for an arm $a$ in group $g$ at time $t$ is:
+$$ c_{at}^g = c_a \cdot \left( 1 + \left( \frac{\text{Spent}_t}{B} \right) \cdot (\pi_{gt} - \pi^*_g) \right)^\gamma $$
+
+Where:
+
+*   $\text{Spent}_t$ is the cumulative budget spent so far.
+*   $\pi_{gt}$ is the current share of group $g$ in the collected sample.
+*   $\pi^*_g$ is the target share for group $g$.
+*   $\gamma \ge 0$ controls the priority of representativeness vs. reward maximization.
+
+**Interpretation**:
+
+*   If group $g$ is over-represented ($\pi_{gt} > \pi^*_g$), effective costs for its arms increase, making them less likely to be selected by the "bang-for-buck" rule.
+*   The adjustment magnitude scales with budget exhaustion: representativeness matters more as the budget runs out.
+
+*   **Reference**: Lal, A. (2022). *Multi-armed Bandits for Budget-Constrained Data Collection*.
 
 ---
 

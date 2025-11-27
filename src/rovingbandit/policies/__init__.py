@@ -9,6 +9,7 @@ from rovingbandit.policies.budgeted_ucb import BudgetedUCB
 from rovingbandit.policies.thompson_sampling import ThompsonSampling
 from rovingbandit.policies.budgeted_thompson import BudgetedThompsonSampling
 from rovingbandit.policies.top_two_thompson import TopTwoThompson
+from rovingbandit.policies.representation_bandit import RepresentationBandit
 
 __all__ = [
     "RandomPolicy",
@@ -20,4 +21,5 @@ __all__ = [
     "ThompsonSampling",
     "BudgetedThompsonSampling",
     "TopTwoThompson",
+    "RepresentationBandit",
 ]

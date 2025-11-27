@@ -23,6 +23,7 @@ from rovingbandit.policies import (
     ThompsonSampling,
     BudgetedThompsonSampling,
     TopTwoThompson,
+    RepresentationBandit,
 )
 
 from rovingbandit.objectives import (
@@ -64,6 +65,7 @@ __all__ = [
     "BudgetedUCB",
     "ThompsonSampling",
     "BudgetedThompsonSampling",
+    "RepresentationBandit",
     "TopTwoThompson",
     # Objectives
     "RegretMinimization",

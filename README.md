@@ -74,7 +74,7 @@ sim_runner(
 - Clean separation of `Policy`, `Objective`, `Environment`, and `Runner` classes
 - Support for all three main objectives
 - Both online (sequential) and batched (parallel) execution modes
-- **25/25 tests passing**, 57% coverage (new code >80%)
+- **28/28 tests passing**, ~60% coverage (new code >80%)
 
 **Available Policies**
 - `RandomPolicy` - Uniform random baseline
@@ -83,6 +83,9 @@ sim_runner(
 - `ExploreFirst` - Explore-then-commit
 - `UCB1` - Upper Confidence Bound (logarithmic regret)
 - `ThompsonSampling` - Bayesian posterior sampling
+- `TopTwoThompson` - Best-arm identification (Russo, 2016)
+- `BudgetedUCB` - Cost-aware UCB for budget constraints
+- `BudgetedThompsonSampling` - Cost-aware Thompson Sampling
 
 **Objectives**
 - `RegretMinimization` - Minimize cumulative regret
@@ -97,15 +100,9 @@ sim_runner(
 - `pick_arm()`, `sim_runner()`, `arm_sequence()`, `pull_sequence()`
 - `best_arm()`, `rep_bandit_cost()`, `rep_bandit_rake()`
 
-### 🚧 Phase 2: Advanced Policies (Next)
-
-**Budget-Aware**
-- BudgetedUCB (cost-aware UCB)
-- Improved ThompsonSamplingBudget
-- FracKUBE (fractional knapsack UCB)
+### 🚧 Phase 2: Advanced Policies (In Progress)
 
 **Best-Arm Identification**
-- TopTwoThompson (corrected implementation)
 - LUCB (Lower-Upper Confidence Bound)
 - SuccessiveElimination
 
@@ -224,6 +221,7 @@ mypy src/
 The new implementation addresses bugs in legacy `banditry.py`:
 1. ✅ Control flow errors (if → elif) - avoided in new design
 2. ✅ Budget constraint edge case - fixed in OnlineRunner
+3. ✅ thompsonTopTwo logic error - fixed in TopTwoThompson policy
 4. 🔜 rep_bandit_rake entropy calculation - will be fixed in Phase 2
 
 ## Documentation

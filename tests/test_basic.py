@@ -13,6 +13,7 @@ from rovingbandit import (
     BudgetedUCB,
     ThompsonSampling,
     BudgetedThompsonSampling,
+    RepresentationBandit,
     TopTwoThompson,
     RegretMinimization,
     BestArmIdentification,
@@ -187,6 +188,50 @@ class TestPolicies:
             counts[arm] += 1
             
         assert counts[1] > counts[0]
+
+    def test_representation_bandit(self):
+        """Test Representation Bandit."""
+        # 2 Groups, 2 Arms. Arm 0 in Group 0, Arm 1 in Group 1.
+        # Costs equal.
+        # Target shares: 0.2 (Group 0), 0.8 (Group 1).
+        # Initially, it should favor Arm 1 (Group 1) if shares are unbalanced.
+        
+        arm_groups = np.array([0, 1])
+        target_shares = np.array([0.2, 0.8])
+        costs = np.array([1.0, 1.0])
+        total_budget = 100.0
+        
+        policy = RepresentationBandit(
+            n_arms=2,
+            arm_groups=arm_groups,
+            target_shares=target_shares,
+            total_budget=total_budget,
+            costs=costs,
+            seed=42
+        )
+        
+        # Simulate equal pulls (50/50 split), which is over-representation for Group 0 (target 0.2)
+        policy.counts[0] = 50
+        policy.counts[1] = 50
+        policy.total_pulls = 100
+        policy.total_cost_incurred = 50.0 # 50% budget spent
+        
+        # Group 0 Share: 0.5. Target 0.2. Over by 0.3.
+        # Group 1 Share: 0.5. Target 0.8. Under by 0.3.
+        
+        # Cost adjustment:
+        # Group 0: 1.0 * (1 + 0.5 * 0.3)^2 = 1.0 * (1.15)^2 = 1.32
+        # Group 1: 1.0 * (1 + 0.5 * -0.3)^2 = 1.0 * (0.85)^2 = 0.72
+        
+        # Ratio for Arm 0 will be penalized. Ratio for Arm 1 boosted.
+        
+        # Set posteriors equal
+        policy.successes[:] = 10
+        policy.failures[:] = 10
+        
+        # Should pick Arm 1
+        arm = policy.select_arm()
+        assert arm == 1
 
     def test_top_two_thompson(self):
         """Test Top-Two Thompson Sampling."""
