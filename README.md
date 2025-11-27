@@ -19,52 +19,69 @@ uv pip install rovingbandit
 
 ```python
 import numpy as np
+
 from rovingbandit import (
+    # environment
     BanditEnvironment,
-    ThompsonSampling,
+    # objectives
     RegretMinimization,
-    OnlineRunner
+    # runner
+    OnlineRunner,
+    # algorithms
+    ThompsonSampling,
+    EpsilonGreedy,
+    UCB1,
+    RandomPolicy,
 )
 
-# Define environment
-env = BanditEnvironment(
-    n_arms=5,
-    arm_means=np.array([0.1, 0.3, 0.5, 0.4, 0.2]),
-)
-
-# Choose policy and objective
-policy = ThompsonSampling(n_arms=5)
-objective = RegretMinimization(optimal_reward=0.5)
-
-# Run simulation
-runner = OnlineRunner()
-result = runner.run(policy, env, n_steps=1000, objective=objective)
-
-# Analyze results
-print(f"Final regret: {result.final_regret}")
-result.plot(metric="cumulative_regret")
-```
-
-### Legacy API (Backward Compatible)
-
-```python
-import numpy as np
-from rovingbandit import sim_runner
 import matplotlib.pyplot as plt
 
-arm_means = np.array([0.1, 0.3, 0.5, 0.7, 0.9])
-
-fig, ax = plt.subplots()
-sim_runner(
-    budget=None,
-    arm_means=arm_means,
-    costs=None,
-    bandits=['greedy', 'egreedy', 'ucb', 'thompson'],
-    ax=ax,
-    number_of_arms=5,
-    number_of_pulls=1000,
+env = BanditEnvironment(
+    n_arms=5,
+    arm_means=np.array([0.1, 0.3, 0.5, 0.4, 0.2]), # arm 3 is the best arm
+    seed=42,
 )
+
+policies = {
+    "Random": RandomPolicy(n_arms=5, seed=42),
+    "Greedy": EpsilonGreedy(n_arms=5, epsilon=0.0, seed=42),
+    "Epsilon-Greedy": EpsilonGreedy(n_arms=5, epsilon=0.1, seed=42),
+    "UCB1": UCB1(n_arms=5, seed=42),
+    "Thompson": ThompsonSampling(n_arms=5, seed=42),
+}
+
+objective = RegretMinimization(optimal_reward=0.5)
+runner = OnlineRunner()
+
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+# run each policy and plot
+for name, policy in policies.items():
+    env.reset_rng(42)
+    result = runner.run(policy, env, n_steps=1000, objective=objective)
+
+    print(
+        f"{name:15} | Final Regret: {result.final_regret:.2f} | Avg Reward: {result.average_reward:.3f}"
+    )
+
+    result.plot(metric="cumulative_regret", ax=axes[0], label=name)
+    result.plot(metric="average_reward", ax=axes[1], label=name)
+
+axes[0].legend()
+axes[0].set_title("Cumulative Regret Over Time")
+axes[1].legend()
+axes[1].set_title("Average Reward Over Time")
+
+# Random          | Final Regret: 194.00 | Avg Reward: 0.306
+# Greedy          | Final Regret: 103.00 | Avg Reward: 0.397
+# Epsilon-Greedy  | Final Regret: 28.00 | Avg Reward: 0.472
+# UCB1            | Final Regret: 75.00 | Avg Reward: 0.425
+# Thompson        | Final Regret: 33.00 | Avg Reward: 0.467
+
 ```
+
+![](examples/example_1_regret_minimization.png)
+
 
 ## Implementation Status
 

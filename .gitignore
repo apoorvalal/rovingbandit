@@ -58,3 +58,5 @@ site/
 *.log
 
 .claude/*
+
+tmp/*
