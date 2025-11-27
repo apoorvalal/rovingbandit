@@ -1,6 +1,10 @@
-# RovingBandit
+# `RovingBandit`
+
+![](img/header_art.png)
 
 A flexible Python library for multi-armed bandit algorithms supporting regret minimization, best-arm identification, and variance minimization in both online and batched modes.
+
+The name is a nod to [Mancur Olson](https://www.jstor.org/stable/2938736).
 
 ## Installation
 
@@ -55,17 +59,19 @@ runner = OnlineRunner()
 
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
+result = {}
+
 # run each policy and plot
 for name, policy in policies.items():
     env.reset_rng(42)
-    result = runner.run(policy, env, n_steps=1000, objective=objective)
+    result[name] = runner.run(policy, env, n_steps=1000, objective=objective)
 
     print(
         f"{name:15} | Final Regret: {result.final_regret:.2f} | Avg Reward: {result.average_reward:.3f}"
     )
 
-    result.plot(metric="cumulative_regret", ax=axes[0], label=name)
-    result.plot(metric="average_reward", ax=axes[1], label=name)
+    result[name].plot(metric="cumulative_regret", ax=axes[0], label=name)
+    result[name].plot(metric="average_reward", ax=axes[1], label=name)
 
 axes[0].legend()
 axes[0].set_title("Cumulative Regret Over Time")
@@ -82,6 +88,23 @@ axes[1].set_title("Average Reward Over Time")
 
 ![](examples/example_1_regret_minimization.png)
 
+We can also visualize the sequence of arms pulled by each policy:
+
+```python
+f, ax = plt.subplots(3, 2, figsize=(15, 10), sharex=True, sharey=False)
+# plot arm pulls for each policy
+for i, (name, res) in enumerate(result.items()):
+    res.plot(
+        metric="arm_pulls",
+        ax=ax[i // 2, i % 2],
+    )
+    ax[i // 2, i % 2].legend()
+    ax[i // 2, i % 2].set_title(f"Arm Pulls Over Time - {name}")
+f.delaxes(ax[2, 1]) # delete unused subplots
+f.tight_layout()
+```
+
+![](examples/example_1_arm_pulls.png)
 
 ## Implementation Status
 
@@ -199,6 +222,8 @@ src/rovingbandit/
 └── banditry.py               # Legacy implementation
 ```
 
+The set of policies is growing; see `SPEC.md` for planned additions. Basic structure is in place for future extensions.
+
 ## Development
 
 ```bash
@@ -232,14 +257,6 @@ mypy src/
 - Efficient incremental mean updates
 - Minimal memory overhead
 - Preliminary benchmarks show 3-5x speedup over naive implementations
-
-## Correctness Issues Fixed
-
-The new implementation addresses bugs in legacy `banditry.py`:
-1. ✅ Control flow errors (if → elif) - avoided in new design
-2. ✅ Budget constraint edge case - fixed in OnlineRunner
-3. ✅ thompsonTopTwo logic error - fixed in TopTwoThompson policy
-4. 🔜 rep_bandit_rake entropy calculation - will be fixed in Phase 2
 
 ## Documentation
 

@@ -147,6 +147,7 @@ class Result:
         self,
         metric: str = "cumulative_reward",
         ax: Optional[plt.Axes] = None,
+        annotation: Optional[str] = "",
         **kwargs,
     ) -> plt.Axes:
         """
@@ -169,16 +170,16 @@ class Result:
         if metric == "cumulative_reward":
             ax.plot(steps, self.history.cumulative_rewards, **kwargs)
             ax.set_ylabel("Cumulative Reward")
-            ax.set_title("Cumulative Reward Over Time")
+            ax.set_title(f"Cumulative Reward {annotation}")
         elif metric == "average_reward":
             ax.plot(steps, self.history.average_reward, **kwargs)
             ax.set_ylabel("Average Reward")
-            ax.set_title("Average Reward Over Time")
+            ax.set_title(f"Average Reward {annotation}")
         elif metric == "cumulative_regret":
             if self.cumulative_regret is not None:
                 ax.plot(steps, self.cumulative_regret, **kwargs)
                 ax.set_ylabel("Cumulative Regret")
-                ax.set_title("Cumulative Regret Over Time")
+                ax.set_title(f"Cumulative Regret {annotation}")
             else:
                 raise ValueError("Cumulative regret not available")
         elif metric == "arm_pulls":
@@ -193,7 +194,7 @@ class Result:
             for arm in range(n_arms):
                 ax.plot(steps, pull_counts[:, arm], label=f"Arm {arm}", **kwargs)
             ax.set_ylabel("Cumulative Pulls")
-            ax.set_title("Arm Pulls Over Time")
+            ax.set_title(f"Arm Pulls {annotation}")
             ax.legend()
         else:
             raise ValueError(f"Unknown metric: {metric}")
