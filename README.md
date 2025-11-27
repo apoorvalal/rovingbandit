@@ -224,7 +224,6 @@ mypy src/
 The new implementation addresses bugs in legacy `banditry.py`:
 1. ✅ Control flow errors (if → elif) - avoided in new design
 2. ✅ Budget constraint edge case - fixed in OnlineRunner
-3. 🔜 thompsonTopTwo logic error - will be reimplemented correctly in Phase 2
 4. 🔜 rep_bandit_rake entropy calculation - will be fixed in Phase 2
 
 ## Documentation

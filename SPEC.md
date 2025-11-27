@@ -498,20 +498,20 @@ class CombinatorialUCB(Policy):
 ## 7. Implementation Roadmap
 
 ### Phase 1: Core Infrastructure
-- [ ] Base classes (Policy, Objective, BanditEnvironment)
-- [ ] Online and Batched runners
-- [ ] Result class with plotting utilities
-- [ ] Basic unit tests
+- [x] Base classes (Policy, Objective, BanditEnvironment)
+- [x] Online and Batched runners
+- [x] Result class with plotting utilities
+- [x] Basic unit tests
 
 ### Phase 2: Regret Minimization
-- [ ] UCB1, UCB-Tuned
-- [ ] Thompson Sampling (Beta-Bernoulli, Gaussian)
-- [ ] Epsilon-Greedy variants
-- [ ] Explore-First
+- [x] UCB1, UCB-Tuned
+- [x] Thompson Sampling (Beta-Bernoulli, Gaussian)
+- [x] Epsilon-Greedy variants
+- [x] Explore-First
 - [ ] Integration tests and benchmarks
 
 ### Phase 3: Best-Arm Identification
-- [ ] Top-Two Thompson Sampling
+- [x] Top-Two Thompson Sampling
 - [ ] LUCB
 - [ ] Successive Elimination
 - [ ] Confidence tracking utilities
@@ -523,7 +523,7 @@ class CombinatorialUCB(Policy):
 - [ ] Representation constraints
 
 ### Phase 5: Extensions
-- [ ] Budget constraints
+- [x] Budget constraints
 - [ ] Cost heterogeneity
 - [ ] Contextual bandits (LinUCB, Neural bandits)
 - [ ] Non-stationary environments

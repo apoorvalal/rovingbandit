@@ -10,7 +10,10 @@ from rovingbandit import (
     EpsilonGreedy,
     ExploreFirst,
     UCB1,
+    BudgetedUCB,
     ThompsonSampling,
+    BudgetedThompsonSampling,
+    TopTwoThompson,
     RegretMinimization,
     BestArmIdentification,
     VarianceMinimization,
@@ -116,6 +119,37 @@ class TestPolicies:
 
         assert policy.total_pulls == 10
 
+    def test_budgeted_ucb(self):
+        """Test Budgeted UCB policy."""
+        policy = BudgetedUCB(n_arms=3, seed=42)
+        
+        # Test initialization
+        assert np.all(policy.avg_costs == 0.0)
+        
+        # Pull each arm once
+        for i in range(3):
+            arm = policy.select_arm()
+            assert arm == i
+            # Arm 0: low cost, high reward
+            # Arm 1: high cost, high reward
+            # Arm 2: low cost, low reward
+            costs = [1.0, 10.0, 1.0]
+            rewards = [1.0, 1.0, 0.0]
+            policy.update(arm, rewards[i], costs[i])
+            
+        # Verify updates
+        assert np.allclose(policy.avg_costs, [1.0, 10.0, 1.0])
+        assert np.allclose(policy.values, [1.0, 1.0, 0.0])
+        
+        # Next pull should favor arm 0 (high value / low cost) over arm 1 (high value / high cost)
+        # UCB numerator will be similar for arm 0 and 1, but cost divides it.
+        # Arm 0 score ~ (1 + bonus) / 1
+        # Arm 1 score ~ (1 + bonus) / 10
+        # Arm 2 score ~ (0 + bonus) / 1
+        
+        arm = policy.select_arm()
+        assert arm == 0
+
     def test_thompson_sampling(self):
         """Test Thompson Sampling."""
         policy = ThompsonSampling(n_arms=5, seed=42)
@@ -127,6 +161,56 @@ class TestPolicies:
 
         assert policy.total_pulls == 10
         assert np.sum(policy.successes) > 0
+
+    def test_budgeted_thompson_sampling(self):
+        """Test Budgeted Thompson Sampling."""
+        # Arm 0: High Reward (0.9), High Cost (10.0) -> Ratio 0.09
+        # Arm 1: Med Reward (0.5), Low Cost (1.0) -> Ratio 0.5
+        costs = np.array([10.0, 1.0])
+        policy = BudgetedThompsonSampling(n_arms=2, costs=costs, seed=42)
+
+        # Simulate some data to make posteriors concentrated
+        # Arm 0: 9 successes, 1 failure
+        policy.successes[0] = 90
+        policy.failures[0] = 10
+        # Arm 1: 5 successes, 5 failures
+        policy.successes[1] = 50
+        policy.failures[1] = 50
+
+        # Posterior means: ~0.9 and ~0.5
+        # Ratios: ~0.09 and ~0.5
+        # Should pick arm 1 consistently
+        
+        counts = np.zeros(2)
+        for _ in range(20):
+            arm = policy.select_arm()
+            counts[arm] += 1
+            
+        assert counts[1] > counts[0]
+
+    def test_top_two_thompson(self):
+        """Test Top-Two Thompson Sampling."""
+        policy = TopTwoThompson(n_arms=5, psi=0.5, seed=42)
+
+        # Basic selection test
+        arm = policy.select_arm()
+        assert 0 <= arm < 5
+
+        # Update test
+        policy.update(arm, 1.0)
+        assert policy.counts[arm] == 1
+        assert policy.successes[arm] == 1.0
+
+        # State dict test
+        state = policy.get_state()
+        assert state["psi"] == 0.5
+        assert state["max_resamples"] == 100
+
+        # Re-initialize and restore
+        new_policy = TopTwoThompson(n_arms=5)
+        new_policy.set_state(state)
+        assert new_policy.psi == 0.5
+        assert np.array_equal(new_policy.successes, policy.successes)
 
 
 class TestObjectives:

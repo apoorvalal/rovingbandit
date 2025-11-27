@@ -19,7 +19,10 @@ from rovingbandit.policies import (
     EpsilonGreedy,
     ExploreFirst,
     UCB1,
+    BudgetedUCB,
     ThompsonSampling,
+    BudgetedThompsonSampling,
+    TopTwoThompson,
 )
 
 from rovingbandit.objectives import (
@@ -58,7 +61,10 @@ __all__ = [
     "EpsilonGreedy",
     "ExploreFirst",
     "UCB1",
+    "BudgetedUCB",
     "ThompsonSampling",
+    "BudgetedThompsonSampling",
+    "TopTwoThompson",
     # Objectives
     "RegretMinimization",
     "BestArmIdentification",

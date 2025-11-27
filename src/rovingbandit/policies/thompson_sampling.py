@@ -77,7 +77,7 @@ class ThompsonSampling(Policy):
 
         # Update successes/failures
         self.successes[arm] += reward
-        self.failures[arm] += (1 - reward)
+        self.failures[arm] += 1 - reward
 
         # Update value estimate
         self._update_value_incremental(arm, reward)
@@ -96,22 +96,21 @@ class ThompsonSampling(Policy):
         alpha = self.prior_alpha + self.successes
         beta = self.prior_beta + self.failures
 
-        samples = np.array([
-            self.rng.beta(alpha[i], beta[i])
-            for i in range(self.n_arms)
-        ])
+        samples = np.array([self.rng.beta(alpha[i], beta[i]) for i in range(self.n_arms)])
 
         return samples
 
     def get_state(self) -> Dict[str, Any]:
         """Get state including posterior parameters."""
         state = super().get_state()
-        state.update({
-            "successes": self.successes.copy(),
-            "failures": self.failures.copy(),
-            "prior_alpha": self.prior_alpha,
-            "prior_beta": self.prior_beta,
-        })
+        state.update(
+            {
+                "successes": self.successes.copy(),
+                "failures": self.failures.copy(),
+                "prior_alpha": self.prior_alpha,
+                "prior_beta": self.prior_beta,
+            }
+        )
         return state
 
     def set_state(self, state: Dict[str, Any]):
