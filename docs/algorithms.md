@@ -196,6 +196,25 @@ Where:
 
 ---
 
+### 4.4 Epsilon-Neyman Allocation
+**Class**: `EpsilonNeymanAllocation`
+
+Targets variance reduction by combining an initial uniform exploration phase with Neyman allocation based on empirical standard deviations.
+
+**Mechanism**:
+
+1.  Explore uniformly for the first $\epsilon T$ pulls.
+2.  Thereafter, pull arm $i$ with probability proportional to $\hat{\sigma}_i = \sqrt{\hat{p}_i (1 - \hat{p}_i)}$.
+
+This approximates the Neyman allocation that minimizes the variance of difference-in-means estimators in Bernoulli settings.
+
+**Notes**:
+
+* Requires a known horizon to determine the exploration window.
+* Most useful for K ≥ 3 adaptive designs; with two arms, uniform randomization is typically sufficient.
+
+---
+
 ## 5. Planned Algorithms
 
 The following algorithms are specified in the roadmap but not yet implemented.

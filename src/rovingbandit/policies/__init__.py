@@ -10,6 +10,7 @@ from rovingbandit.policies.thompson_sampling import ThompsonSampling
 from rovingbandit.policies.budgeted_thompson import BudgetedThompsonSampling
 from rovingbandit.policies.top_two_thompson import TopTwoThompson
 from rovingbandit.policies.representation_bandit import RepresentationBandit
+from rovingbandit.policies.epsilon_neyman import EpsilonNeymanAllocation
 
 __all__ = [
     "RandomPolicy",
@@ -22,4 +23,5 @@ __all__ = [
     "BudgetedThompsonSampling",
     "TopTwoThompson",
     "RepresentationBandit",
+    "EpsilonNeymanAllocation",
 ]

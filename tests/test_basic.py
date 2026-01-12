@@ -13,6 +13,7 @@ from rovingbandit import (
     BudgetedUCB,
     ThompsonSampling,
     BudgetedThompsonSampling,
+    EpsilonNeymanAllocation,
     RepresentationBandit,
     TopTwoThompson,
     RegretMinimization,
@@ -256,6 +257,31 @@ class TestPolicies:
         new_policy.set_state(state)
         assert new_policy.psi == 0.5
         assert np.array_equal(new_policy.successes, policy.successes)
+
+    def test_epsilon_neyman_allocation(self):
+        """Test epsilon-Neyman allocation policy."""
+        policy = EpsilonNeymanAllocation(
+            n_arms=3, exploration_fraction=0.2, horizon=50, seed=42
+        )
+
+        # Exploration phase should return a valid arm
+        arm = policy.select_arm()
+        assert 0 <= arm < 3
+
+        # Move into allocation phase with known estimates
+        policy.counts = np.array([10.0, 10.0, 10.0])
+        policy.values = np.array([0.1, 0.5, 0.9])
+        policy.total_pulls = 30  # past exploration threshold
+
+        probs = policy._allocation_probabilities()
+        assert probs.shape == (3,)
+        assert np.isclose(np.sum(probs), 1.0)
+        # Highest variance at p=0.5 => arm 1 should have highest allocation
+        assert probs[1] > probs[0]
+        assert probs[1] > probs[2]
+
+        draws = [policy.select_arm() for _ in range(10)]
+        assert all(0 <= draw < 3 for draw in draws)
 
 
 class TestObjectives:

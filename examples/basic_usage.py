@@ -15,6 +15,7 @@ from rovingbandit import (
     ThompsonSampling,
     EpsilonGreedy,
     RandomPolicy,
+    EpsilonNeymanAllocation,
     RegretMinimization,
     BestArmIdentification,
     VarianceMinimization,
@@ -192,6 +193,130 @@ def example_5_variance_minimization():
         print(f"Group 0 share: {shares[0]:.3f} (target: 0.5)")
         print(f"Group 1 share: {shares[1]:.3f} (target: 0.5)")
 
+
+def example_6_epsilon_neyman_variance():
+    """Example 6: Neyman allocation for lower standard errors."""
+    print("\n" + "=" * 70)
+    print("Example 6: Epsilon-Neyman Allocation")
+    print("=" * 70)
+
+    # Two-arm Bernoulli experiment with different variances
+    # Arm 0: p = 0.05 (sigma ~ 0.218), Arm 1: p = 0.35 (sigma ~ 0.477)
+    arm_means = np.array([0.05, 0.35])
+    n_steps = 1000
+    exploration_fraction = 0.2
+
+    env = BanditEnvironment(n_arms=2, arm_means=arm_means, seed=123)
+    runner = OnlineRunner()
+
+    def ate_standard_error(values, counts) -> float:
+        """Wald SE for difference in Bernoulli means."""
+        p0, p1 = values
+        n0, n1 = np.maximum(counts, 1)  # avoid division by zero
+        var = p0 * (1 - p0) / n0 + p1 * (1 - p1) / n1
+        return float(np.sqrt(var))
+
+    # Uniform random assignment baseline
+    env.reset_rng(123)
+    random_result = runner.run(
+        RandomPolicy(n_arms=2, seed=123),
+        env,
+        n_steps=n_steps,
+        objective=VarianceMinimization(),
+    )
+
+    # Epsilon-Neyman allocation
+    neyman_policy = EpsilonNeymanAllocation(
+        n_arms=2,
+        exploration_fraction=exploration_fraction,
+        horizon=n_steps,
+        seed=123,
+    )
+    env.reset_rng(123)
+    neyman_result = runner.run(
+        neyman_policy,
+        env,
+        n_steps=n_steps,
+        objective=VarianceMinimization(),
+    )
+
+    random_counts = random_result.policy_state["counts"]
+    neyman_counts = neyman_result.policy_state["counts"]
+
+    random_se = ate_standard_error(random_result.policy_state["values"], random_counts)
+    neyman_se = ate_standard_error(neyman_result.policy_state["values"], neyman_counts)
+
+    print(f"Arm means (true): {arm_means}")
+    print(f"Random counts: {random_counts.astype(int)} | share: {random_counts / n_steps}")
+    print(f"Neyman counts: {neyman_counts.astype(int)} | share: {neyman_counts / n_steps}")
+    print(f"SE (random): {random_se:.4f}")
+    print(f"SE (epsilon-Neyman): {neyman_se:.4f}")
+    print(
+        f"SE reduction vs random: {(1 - neyman_se / random_se) * 100:.1f}% "
+        f"(epsilon={exploration_fraction})"
+    )
+
+
+def example_7_epsilon_neyman_multiarm():
+    """Example 7: Multi-arm Neyman allocation (variance-oriented design)."""
+    print("\n" + "=" * 70)
+    print("Example 7: Multi-Arm Epsilon-Neyman Allocation")
+    print("=" * 70)
+
+    # Five arms with heterogeneous variances
+    arm_means = np.array([0.05, 0.15, 0.35, 0.6, 0.8])
+    n_steps = 3000
+    exploration_fraction = 0.2
+
+    env = BanditEnvironment(n_arms=5, arm_means=arm_means, seed=202)
+    runner = OnlineRunner()
+
+    def variance_score(values, counts) -> float:
+        """Sum of per-arm Bernoulli variances over allocated samples."""
+        sigmas_sq = np.clip(values * (1 - values), 1e-8, None)
+        counts = np.maximum(counts, 1)
+        return float(np.sum(sigmas_sq / counts))
+
+    # Baseline: uniform randomization
+    env.reset_rng(202)
+    random_result = runner.run(
+        RandomPolicy(n_arms=5, seed=202),
+        env,
+        n_steps=n_steps,
+        objective=VarianceMinimization(),
+    )
+
+    # Epsilon-Neyman allocation
+    neyman_policy = EpsilonNeymanAllocation(
+        n_arms=5,
+        exploration_fraction=exploration_fraction,
+        horizon=n_steps,
+        seed=202,
+    )
+    env.reset_rng(202)
+    neyman_result = runner.run(
+        neyman_policy,
+        env,
+        n_steps=n_steps,
+        objective=VarianceMinimization(),
+    )
+
+    random_counts = random_result.policy_state["counts"]
+    neyman_counts = neyman_result.policy_state["counts"]
+
+    random_score = variance_score(random_result.policy_state["values"], random_counts)
+    neyman_score = variance_score(neyman_result.policy_state["values"], neyman_counts)
+
+    print(f"Arm means (true): {arm_means}")
+    print(f"Random counts:  {random_counts.astype(int)} | shares: {random_counts / n_steps}")
+    print(f"Neyman counts:  {neyman_counts.astype(int)} | shares: {neyman_counts / n_steps}")
+    print(f"Variance score (lower is better) - random: {random_score:.6f}")
+    print(f"Variance score (lower is better) - epsilon-Neyman: {neyman_score:.6f}")
+    print(
+        f"Variance score reduction vs random: {(1 - neyman_score / random_score) * 100:.1f}% "
+        f"(epsilon={exploration_fraction})"
+    )
+
 # %%
 if __name__ == "__main__":
     print("\nRovingBandit Library - Usage Examples")
@@ -202,6 +327,8 @@ if __name__ == "__main__":
     example_3_budget_constraint()
     example_4_batched_mode()
     example_5_variance_minimization()
+    example_6_epsilon_neyman_variance()
+    example_7_epsilon_neyman_multiarm()
 
     print("\n" + "=" * 70)
     print("All examples completed!")

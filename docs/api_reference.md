@@ -81,6 +81,7 @@ All policies are located in `rovingbandit.policies`.
 | `ThompsonSampling` | Regret | Bayesian posterior sampling (Beta-Bernoulli). |
 | `TopTwoThompson` | BAI | Modified Thompson Sampling for Best-Arm Identification. |
 | `BudgetedUCB` | Budget | Cost-aware UCB for knapsack-like constraints. |
+| `EpsilonNeymanAllocation` | Variance | Explore uniformly then allocate by estimated standard deviation (horizon required; suited for K ≥ 3). |
 
 ---
 

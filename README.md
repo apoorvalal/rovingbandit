@@ -126,6 +126,7 @@ f.tight_layout()
 - `TopTwoThompson` - Best-arm identification (Russo, 2016)
 - `BudgetedUCB` - Cost-aware UCB for budget constraints
 - `BudgetedThompsonSampling` - Cost-aware Thompson Sampling
+- `EpsilonNeymanAllocation` - Explore uniformly then allocate by estimated standard deviation (requires horizon; best for K ≥ 3)
 
 **Objectives**
 - `RegretMinimization` - Minimize cumulative regret

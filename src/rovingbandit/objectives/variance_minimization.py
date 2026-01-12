@@ -99,6 +99,13 @@ class VarianceMinimization(Objective):
             "estimation_variance": self.compute_metric(history, policy=policy),
         }
 
+        # Log allocation probabilities when available (useful for Neyman-style policies)
+        get_probs = getattr(policy, "get_allocation_probabilities", None)
+        if callable(get_probs):
+            probs = get_probs()
+            if probs is not None:
+                metadata["allocation_probabilities"] = probs
+
         # Compute group shares if groups defined
         if arm_groups is not None:
             arms_array = history.arms_array
