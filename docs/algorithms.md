@@ -137,6 +137,18 @@ This forces the algorithm to explore the second-best arm (the most likely challe
 
 *   **Reference**: Russo, D. (2016). *Simple Bayesian algorithms for best arm identification*.
 
+### 3.2 LUCB (Lower-Upper Confidence Bound)
+**Class**: `LUCB`
+
+Maintains empirical means with confidence intervals. Identifies the empirical leader and the most competitive challenger (highest UCB among non-leaders), then samples the arm with the larger uncertainty among the two to shrink the ambiguous gap.
+
+**Algorithm (one-pull approximation)**:
+1. Compute $\text{mean}_i$ and radius $r_i = \sqrt{c \log t / n_i}$.
+2. Leader $b = \arg\max_i \text{mean}_i$; challenger $c = \arg\max_{j \neq b} (\text{mean}_j + r_j)$.
+3. Sample $\arg\max_{a \in \{b, c\}} r_a$.
+
+**Reference**: Kalyanakrishnan et al. (2012). *PAC subset selection in stochastic multi-armed bandits*.
+
 ---
 
 ## 4. Extension Policies
@@ -213,6 +225,16 @@ This approximates the Neyman allocation that minimizes the variance of differenc
 * Requires a known horizon to determine the exploration window.
 * Most useful for K ≥ 3 adaptive designs; with two arms, uniform randomization is typically sufficient.
 
+### 4.5 Kasy-Sautmann (Welfare-Constrained Variance Minimization)
+**Class**: `KasySautmann`
+
+Allocates probability proportional to empirical standard deviations while suppressing arms whose estimated mean falls below a welfare floor (fraction of the current best arm). This approximates welfare-constrained variance minimization for adaptive experiments.
+
+**Mechanism**:
+1. Pull each arm once.
+2. Compute $\hat{\sigma}_i = \sqrt{\hat{p}_i (1 - \hat{p}_i)}$.
+3. Zero weight arms with $\hat{p}_i < \tau \cdot \max_j \hat{p}_j$ (welfare floor $\tau$), renormalize, and sample.
+
 ---
 
 ## 5. Planned Algorithms
@@ -231,7 +253,9 @@ Minimize the variance of the treatment effect estimator (allocating samples prop
 Solves a constrained optimization problem at each step to determine sampling probabilities.
 
 ### 5.3 Contextual Bandits (LinUCB)
+**Status**: LinUCB implemented; richer contextual models (e.g., neural bandits) remain planned.
+
 **Target**: Contextual Regret Minimization.
 Assumes expected reward is a linear function of a context vector $x_t \in \mathbb{R}^d$: $\mathbb{E}[r_t] = x_t^\top \theta^*$.
-Mains a ridge regression estimate of $\theta^*$ and a confidence ellipsoid.
+Maintains a ridge regression estimate of $\theta^*$ and a confidence ellipsoid.
 Selects arm maximizing $x_{t,a}^\top \hat{\theta}_t + \alpha \sqrt{x_{t,a}^\top A_t^{-1} x_{t,a}}$.

@@ -23,6 +23,9 @@ from rovingbandit.policies import (
     ThompsonSampling,
     BudgetedThompsonSampling,
     EpsilonNeymanAllocation,
+    LUCB,
+    KasySautmann,
+    LinUCB,
     TopTwoThompson,
     RepresentationBandit,
 )
@@ -68,6 +71,9 @@ __all__ = [
     "BudgetedThompsonSampling",
     "RepresentationBandit",
     "EpsilonNeymanAllocation",
+    "LUCB",
+    "KasySautmann",
+    "LinUCB",
     "TopTwoThompson",
     # Objectives
     "RegretMinimization",

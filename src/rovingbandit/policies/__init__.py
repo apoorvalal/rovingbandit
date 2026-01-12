@@ -11,6 +11,9 @@ from rovingbandit.policies.budgeted_thompson import BudgetedThompsonSampling
 from rovingbandit.policies.top_two_thompson import TopTwoThompson
 from rovingbandit.policies.representation_bandit import RepresentationBandit
 from rovingbandit.policies.epsilon_neyman import EpsilonNeymanAllocation
+from rovingbandit.policies.lucb import LUCB
+from rovingbandit.policies.kasy_sautmann import KasySautmann
+from rovingbandit.policies.linucb import LinUCB
 
 __all__ = [
     "RandomPolicy",
@@ -24,4 +27,7 @@ __all__ = [
     "TopTwoThompson",
     "RepresentationBandit",
     "EpsilonNeymanAllocation",
+    "LUCB",
+    "KasySautmann",
+    "LinUCB",
 ]

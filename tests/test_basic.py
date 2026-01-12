@@ -14,6 +14,9 @@ from rovingbandit import (
     ThompsonSampling,
     BudgetedThompsonSampling,
     EpsilonNeymanAllocation,
+    LUCB,
+    KasySautmann,
+    LinUCB,
     RepresentationBandit,
     TopTwoThompson,
     RegretMinimization,
@@ -257,6 +260,67 @@ class TestPolicies:
         new_policy.set_state(state)
         assert new_policy.psi == 0.5
         assert np.array_equal(new_policy.successes, policy.successes)
+
+    def test_lucb(self):
+        """Test LUCB policy for best-arm identification."""
+        policy = LUCB(n_arms=3, exploration_factor=2.0, seed=0)
+
+        # Initial pulls should cover all arms
+        pulled = []
+        for _ in range(3):
+            arm = policy.select_arm()
+            pulled.append(arm)
+            policy.update(arm, reward=0.0)
+        assert set(pulled) == {0, 1, 2}
+
+        # Set empirical means to favor arm 2 but with uncertainty on arm 1
+        policy.values = np.array([0.2, 0.6, 0.8])
+        policy.counts = np.array([50.0, 5.0, 50.0])
+        policy.total_pulls = 105
+
+        arm = policy.select_arm()
+        # Should focus on either the leader (2) or the challenger (1)
+        assert arm in (1, 2)
+
+    def test_kasy_sautmann(self):
+        """Test Kasy-Sautmann variance allocation with welfare constraint."""
+        policy = KasySautmann(n_arms=2, welfare_threshold=0.75, smoothing=1e-4, seed=1)
+
+        # After initialization, pull unobserved arm
+        arm = policy.select_arm()
+        assert 0 <= arm < 2
+
+        # Set estimates: arm 0 below welfare floor, arm 1 above
+        policy.values = np.array([0.2, 0.9])
+        policy.counts = np.array([20.0, 20.0])
+        policy.total_pulls = 40
+
+        probs = policy._allocation_probabilities()
+        assert probs[1] > probs[0]
+        assert np.isclose(np.sum(probs), 1.0)
+
+        draws = [policy.select_arm() for _ in range(5)]
+        assert all(d in (0, 1) for d in draws)
+
+    def test_linucb(self):
+        """Test LinUCB with simple linear rewards."""
+        contexts = np.array([[1.0, 0.0], [0.0, 1.0]])
+        theta = np.array([1.0, 0.5])
+
+        def reward_fn(arm, rng):
+            return float(np.dot(contexts[arm], theta))
+
+        env = BanditEnvironment(n_arms=2, arm_means=None, contexts=contexts, reward_fn=reward_fn)
+        policy = LinUCB(n_arms=2, alpha=0.1, seed=0)
+        runner = OnlineRunner()
+
+        result = runner.run(policy, env, n_steps=50)
+
+        counts = result.policy_state["counts"]
+        assert counts[0] > counts[1]  # arm 0 has higher expected reward
+
+        # Estimated values should reflect the linear reward ordering
+        assert result.policy_state["values"][0] > result.policy_state["values"][1]
 
     def test_epsilon_neyman_allocation(self):
         """Test epsilon-Neyman allocation policy."""

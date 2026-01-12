@@ -127,6 +127,9 @@ f.tight_layout()
 - `BudgetedUCB` - Cost-aware UCB for budget constraints
 - `BudgetedThompsonSampling` - Cost-aware Thompson Sampling
 - `EpsilonNeymanAllocation` - Explore uniformly then allocate by estimated standard deviation (requires horizon; best for K ≥ 3)
+- `LUCB` - Lower-Upper Confidence Bound for best-arm identification
+- `KasySautmann` - Welfare-constrained variance minimization
+- `LinUCB` - Linear contextual UCB
 
 **Objectives**
 - `RegretMinimization` - Minimize cumulative regret
@@ -144,11 +147,11 @@ f.tight_layout()
 ### 🚧 Phase 2: Advanced Policies (In Progress)
 
 **Best-Arm Identification**
-- LUCB (Lower-Upper Confidence Bound)
+- LUCB (Lower-Upper Confidence Bound) – implemented
 - SuccessiveElimination
 
 **Variance Minimization**
-- KasySautmann (welfare-constrained)
+- KasySautmann (welfare-constrained) – implemented
 - NeymanAllocation (optimal experimental design)
 
 **Representation Constraints**
@@ -157,7 +160,7 @@ f.tight_layout()
 
 ### 📋 Phase 3: Extensions (Planned)
 
-- Contextual bandits (LinUCB, Neural bandits)
+- Contextual bandits (LinUCB implemented; Neural bandits planned)
 - Non-stationary environments (discounted, sliding window)
 - Combinatorial actions
 - Policy comparison utilities

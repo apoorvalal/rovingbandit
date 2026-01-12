@@ -48,8 +48,11 @@ class OnlineRunner:
 
         # Main loop
         for step in range(n_steps):
-            # Select arm
-            arm = policy.select_arm()
+            # Retrieve contexts if available
+            contexts = environment.get_contexts() if hasattr(environment, "get_contexts") else None
+
+            # Select arm (pass contexts if policy can use them)
+            arm = policy.select_arm(contexts)
 
             # Pull arm and observe reward
             reward, cost = environment.pull(arm)
@@ -58,7 +61,13 @@ class OnlineRunner:
             policy.update(arm, reward, cost)
 
             # Record history
-            history.add(arm, reward, cost)
+            chosen_context = None
+            if contexts is not None:
+                try:
+                    chosen_context = contexts[arm]
+                except Exception:
+                    chosen_context = None
+            history.add(arm, reward, cost, context=chosen_context)
 
             # Check stopping criterion
             if early_stopping and objective is not None:

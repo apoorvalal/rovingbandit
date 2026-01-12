@@ -82,6 +82,9 @@ All policies are located in `rovingbandit.policies`.
 | `TopTwoThompson` | BAI | Modified Thompson Sampling for Best-Arm Identification. |
 | `BudgetedUCB` | Budget | Cost-aware UCB for knapsack-like constraints. |
 | `EpsilonNeymanAllocation` | Variance | Explore uniformly then allocate by estimated standard deviation (horizon required; suited for K ≥ 3). |
+| `LUCB` | BAI | Lower-Upper Confidence Bound for best-arm identification. |
+| `KasySautmann` | Variance | Variance-focused allocation with welfare threshold. |
+| `LinUCB` | Contextual | Linear UCB for contextual bandits. |
 
 ---
 

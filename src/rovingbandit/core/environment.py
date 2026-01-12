@@ -23,6 +23,7 @@ class BanditEnvironment:
         costs: Optional[np.ndarray] = None,
         arm_groups: Optional[np.ndarray] = None,
         reward_fn: Optional[Callable[[int, np.random.Generator], float]] = None,
+        contexts: Optional[np.ndarray] = None,
         seed: Optional[int] = None,
     ):
         """
@@ -34,6 +35,7 @@ class BanditEnvironment:
             costs: Cost to pull each arm (default: all 1.0)
             arm_groups: Group membership array for representation constraints
             reward_fn: Custom reward function, overrides arm_means if provided
+            contexts: Optional matrix of contextual features per arm (n_arms x d)
             seed: Random seed for reproducibility
         """
         self.n_arms = n_arms
@@ -41,6 +43,7 @@ class BanditEnvironment:
         self.costs = costs if costs is not None else np.ones(n_arms)
         self.arm_groups = arm_groups
         self.reward_fn = reward_fn
+        self.contexts = contexts
         self.rng = np.random.default_rng(seed)
 
         # Validate inputs
@@ -54,6 +57,9 @@ class BanditEnvironment:
 
         if arm_groups is not None:
             assert len(arm_groups) == n_arms, "arm_groups length must match n_arms"
+
+        if contexts is not None:
+            assert contexts.shape[0] == n_arms, "contexts first dimension must match n_arms"
 
     def pull(self, arm: int) -> Tuple[float, float]:
         """
@@ -111,3 +117,7 @@ class BanditEnvironment:
     def reset_rng(self, seed: Optional[int] = None):
         """Reset the random number generator."""
         self.rng = np.random.default_rng(seed)
+
+    def get_contexts(self) -> Optional[np.ndarray]:
+        """Return contextual feature matrix if available."""
+        return None if self.contexts is None else self.contexts.copy()
