@@ -108,60 +108,38 @@ f.tight_layout()
 
 ## Implementation Status
 
-### ✅ Phase 1: Core Infrastructure (COMPLETED)
-
-**Modular OOP Architecture**
+**Core**
 - Clean separation of `Policy`, `Objective`, `Environment`, and `Runner` classes
-- Support for all three main objectives
-- Both online (sequential) and batched (parallel) execution modes
-- **28/28 tests passing**, ~60% coverage (new code >80%)
+- Online and batched execution modes; budget support; early stopping hooks
+- Tests passing (~60% overall coverage; >80% on new code)
 
 **Available Policies**
-- `RandomPolicy` - Uniform random baseline
-- `GreedyPolicy` - Pure exploitation
-- `EpsilonGreedy` - ε-greedy with optional decay
-- `ExploreFirst` - Explore-then-commit
-- `UCB1` - Upper Confidence Bound (logarithmic regret)
-- `ThompsonSampling` - Bayesian posterior sampling
-- `TopTwoThompson` - Best-arm identification (Russo, 2016)
-- `BudgetedUCB` - Cost-aware UCB for budget constraints
-- `BudgetedThompsonSampling` - Cost-aware Thompson Sampling
-- `EpsilonNeymanAllocation` - Explore uniformly then allocate by estimated standard deviation (requires horizon; best for K ≥ 3)
-- `LUCB` - Lower-Upper Confidence Bound for best-arm identification
-- `KasySautmann` - Welfare-constrained variance minimization
-- `LinUCB` - Linear contextual UCB
+- `RandomPolicy`, `GreedyPolicy`, `EpsilonGreedy`, `ExploreFirst`
+- `UCB1`, `ThompsonSampling`
+- `TopTwoThompson`, `LUCB` for best-arm identification
+- `BudgetedUCB`, `BudgetedThompsonSampling`
+- `EpsilonNeymanAllocation` (Neyman allocation with explore-then-allocate)
+- `KasySautmann` (welfare-constrained variance minimization)
+- `RepresentationBandit` (dynamic cost scaling for targets)
+- `LinUCB` (linear contextual UCB)
 
 **Objectives**
-- `RegretMinimization` - Minimize cumulative regret
-- `BestArmIdentification` - Identify best arm with confidence
-- `VarianceMinimization` - Minimize estimation variance
+- `RegretMinimization`
+- `BestArmIdentification`
+- `VarianceMinimization`
 
 **Runners**
-- `OnlineRunner` - Sequential decision-making with budget support
-- `BatchedRunner` - Parallel batch processing
+- `OnlineRunner` (sequential, budget-aware)
+- `BatchedRunner` (parallel)
 
-**Legacy Functions** (all working)
+**Legacy Functions** (backward compatibility)
 - `pick_arm()`, `sim_runner()`, `arm_sequence()`, `pull_sequence()`
 - `best_arm()`, `rep_bandit_cost()`, `rep_bandit_rake()`
 
-### 🚧 Phase 2: Advanced Policies (In Progress)
-
-**Best-Arm Identification**
-- LUCB (Lower-Upper Confidence Bound) – implemented
-- SuccessiveElimination
-
-**Variance Minimization**
-- KasySautmann (welfare-constrained) – implemented
-- NeymanAllocation (optimal experimental design)
-
-**Representation Constraints**
-- RepresentationBandit with dynamic cost scaling
-- Entropy-based allocation
-
-### 📋 Phase 3: Extensions (Planned)
-
-- Contextual bandits (LinUCB implemented; Neural bandits planned)
-- Non-stationary environments (discounted, sliding window)
+**Planned Extensions**
+- SuccessiveElimination for best-arm identification
+- Neural/contextual bandits beyond LinUCB
+- Non-stationary variants (discounted, sliding window)
 - Combinatorial actions
 - Policy comparison utilities
 
@@ -266,6 +244,7 @@ mypy src/
 
 - This README - quickstart and API overview
 - `SPEC.md` - detailed architecture specification with academic references
+- `docs/algorithms.md` - mathematical and algorithmic reference
 - Inline docstrings - all public methods documented
 - `examples/` - comprehensive usage examples
 - Tests - serve as additional documentation
