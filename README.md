@@ -67,7 +67,7 @@ for name, policy in policies.items():
     result[name] = runner.run(policy, env, n_steps=1000, objective=objective)
 
     print(
-        f"{name:15} | Final Regret: {result.final_regret:.2f} | Avg Reward: {result.average_reward:.3f}"
+        f"{name:15} | Final Regret: {result[name].final_regret:.2f} | Avg Reward: {result[name].average_reward:.3f}"
     )
 
     result[name].plot(metric="cumulative_regret", ax=axes[0], label=name)
